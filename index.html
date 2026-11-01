@@ -1,0 +1,1792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LostLink AI — Find what matters. Before it's gone.</title>
+
+  <!-- Apple‑style font stack (system fonts, no external dependency) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Phosphor icons for lightweight UI glyphs -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <!-- GSAP + ScrollTrigger for Apple‑style pinned/scrubbed animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <style>
+    /* ============================================================
+       APPLE‑INSPIRED DESIGN SYSTEM
+       – Binary light / dark rhythm
+       – Single accent blue (#0071e3) reserved for actions
+       – SF‑Pro‑like optical typography
+       – Pill‑shaped CTAs (980px)
+       ============================================================ */
+    :root {
+      --bg-black: #000000;
+      --bg-near-black: #1d1d1f;
+      --bg-light: #f5f5f7;
+      --bg-white: #ffffff;
+      --text-dark: #1d1d1f;
+      --text-light: #f5f5f7;
+      --text-secondary-dark: #86868b;
+      --text-secondary-light: #6e6e73;
+      --accent-blue: #0071e3;
+      --accent-link: #0066cc;
+      --accent-sky: #2997ff;
+      --border-dark: rgba(255, 255, 255, 0.08);
+      --border-light: rgba(0, 0, 0, 0.08);
+      --radius-pill: 980px;
+      --radius-lg: 28px;
+      --radius-md: 20px;
+      --font-main: "Inter", system-ui, -apple-system, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: auto; /* let GSAP / Lenis handle smoothing */
+    }
+
+    body {
+      font-family: var(--font-main);
+      background: var(--bg-black);
+      color: var(--text-light);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* ---------- Typography (Apple‑style tight tracking) ---------- */
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.08;
+    }
+
+    h1 {
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+
+    h2 {
+      font-size: clamp(2rem, 5vw, 4rem);
+      letter-spacing: -0.03em;
+    }
+
+    h3 {
+      font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+    }
+
+    p {
+      font-size: clamp(1rem, 1.1vw, 1.15rem);
+      line-height: 1.65;
+      color: var(--text-secondary-dark);
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent-sky);
+      margin-bottom: 1rem;
+    }
+
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .container-wide {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ============================================================
+       NAVBAR — frosted glass, auto‑hiding
+       ============================================================ */
+    .navbar {
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 1000;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--border-dark);
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .navbar .container-wide {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .nav-logo {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-light);
+      text-decoration: none;
+      letter-spacing: -0.01em;
+    }
+
+    .nav-logo span {
+      color: var(--accent-sky);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 0.8rem;
+      color: var(--text-secondary-dark);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--text-light);
+    }
+
+    .nav-cta {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #fff;
+      background: var(--accent-blue);
+      padding: 9px 20px;
+      border-radius: var(--radius-pill);
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .nav-cta:hover {
+      background: #0071e3;
+      transform: scale(1.03);
+    }
+
+    /* ============================================================
+       HERO — scroll‑pinned radar animation
+       ============================================================ */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 160px 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1000px;
+      height: 1000px;
+      background: radial-gradient(
+        circle,
+        rgba(41, 151, 255, 0.08) 0%,
+        transparent 65%
+      );
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent-sky);
+      margin-bottom: 1.8rem;
+    }
+
+    .hero h1 {
+      max-width: 950px;
+      margin: 0 auto 1.6rem;
+    }
+
+    .hero-sub {
+      max-width: 620px;
+      margin: 0 auto 2.8rem;
+      font-size: 1.2rem;
+      color: var(--text-secondary-dark);
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 4rem;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 15px 34px;
+      background: var(--accent-blue);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 500;
+      border: none;
+      border-radius: var(--radius-pill);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+
+    .btn-primary:hover {
+      background: #0071e3;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0, 113, 227, 0.35);
+    }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 15px 34px;
+      background: transparent;
+      color: var(--text-light);
+      font-size: 0.95rem;
+      font-weight: 500;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: var(--radius-pill);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.45);
+    }
+
+    /* --- Hero visual : live radar / pulse (CSS + SVG) --- */
+    .hero-visual {
+      width: 100%;
+      max-width: 980px;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 50px 100px rgba(0, 0, 0, 0.6);
+      border: 1px solid var(--border-dark);
+      background: #0a0a0c;
+      min-height: 420px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .radar-stage {
+      position: relative;
+      width: 100%;
+      height: 420px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .radar-svg {
+      width: 100%;
+      height: 100%;
+      max-width: 760px;
+    }
+
+    /* Radar sweep line */
+    .radar-sweep {
+      transform-origin: 50% 50%;
+      animation: sweep 3.2s linear infinite;
+    }
+
+    @keyframes sweep {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Concentric pulse rings */
+    .pulse-ring {
+      animation: pulse 2.6s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+      transform-origin: center;
+      opacity: 0;
+    }
+
+    .pulse-ring:nth-child(2) {
+      animation-delay: 0.6s;
+    }
+
+    .pulse-ring:nth-child(3) {
+      animation-delay: 1.2s;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(0.2);
+        opacity: 0.8;
+      }
+      70% {
+        opacity: 0.15;
+      }
+      100% {
+        transform: scale(1.6);
+        opacity: 0;
+      }
+    }
+
+    /* Floating tracker dot */
+    .tracker-dot {
+      animation: floatDot 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes floatDot {
+      from {
+        transform: translate(0, 0);
+      }
+      to {
+        transform: translate(18px, -12px);
+      }
+    }
+
+    /* ============================================================
+       SECTION RHYTHM — alternating black / light gray
+       ============================================================ */
+    .section-dark {
+      background: var(--bg-black);
+      color: var(--text-light);
+      padding: 140px 0;
+    }
+
+    .section-light {
+      background: var(--bg-light);
+      color: var(--text-dark);
+      padding: 140px 0;
+    }
+
+    .section-light p {
+      color: var(--text-secondary-light);
+    }
+
+    .section-light .section-label {
+      color: var(--accent-blue);
+    }
+
+    /* ============================================================
+       FEATURES — Apple‑style bento with hover lift
+       ============================================================ */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 3.5rem;
+    }
+
+    .bento-card {
+      background: #121214;
+      border: 1px solid var(--border-dark);
+      border-radius: var(--radius-md);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      min-height: 280px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.35s, border-color 0.35s, background 0.35s;
+    }
+
+    .section-light .bento-card {
+      background: #ffffff;
+      border-color: var(--border-light);
+    }
+
+    .bento-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(0, 113, 227, 0.35);
+    }
+
+    .section-light .bento-card:hover {
+      border-color: rgba(0, 113, 227, 0.45);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+    }
+
+    .bento-icon {
+      position: absolute;
+      top: 28px;
+      left: 28px;
+      font-size: 2rem;
+      color: var(--accent-sky);
+      opacity: 0.9;
+    }
+
+    .section-light .bento-icon {
+      color: var(--accent-blue);
+    }
+
+    .bento-card h3 {
+      margin-bottom: 0.5rem;
+      font-size: 1.3rem;
+    }
+
+    .bento-card p {
+      font-size: 0.9rem;
+      margin: 0;
+      color: var(--text-secondary-dark);
+    }
+
+    .section-light .bento-card p {
+      color: var(--text-secondary-light);
+    }
+
+    .bento-wide {
+      grid-column: span 2;
+    }
+
+    .bento-tall {
+      grid-row: span 2;
+    }
+
+    /* ============================================================
+       HOW IT WORKS — pinned steps with scrubbed visuals
+       ============================================================ */
+    .how-section {
+      padding: 160px 0 0;
+    }
+
+    .how-step {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+      min-height: 78vh;
+      padding: 60px 0;
+      border-bottom: 1px solid var(--border-dark);
+    }
+
+    .how-step:last-child {
+      border-bottom: none;
+    }
+
+    .how-step:nth-child(even) {
+      direction: rtl;
+    }
+
+    .how-step:nth-child(even) > * {
+      direction: ltr;
+    }
+
+    .step-number {
+      font-size: 5rem;
+      font-weight: 800;
+      color: rgba(255, 255, 255, 0.05);
+      line-height: 1;
+      margin-bottom: 1rem;
+      letter-spacing: -0.05em;
+    }
+
+    .how-step h3 {
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .how-step p {
+      max-width: 440px;
+    }
+
+    .step-visual {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border-dark);
+      background: #0a0a0c;
+      min-height: 340px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* --- Step 1 : Pairing animation (two devices linking) --- */
+    .pair-anim {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      width: 100%;
+      height: 340px;
+      position: relative;
+    }
+
+    .pair-icon {
+      font-size: 4rem;
+      color: var(--accent-sky);
+      animation: breathe 2.4s ease-in-out infinite;
+    }
+
+    .pair-icon:last-child {
+      animation-delay: 1.2s;
+    }
+
+    @keyframes breathe {
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 0.7;
+      }
+      50% {
+        transform: scale(1.15);
+        opacity: 1;
+      }
+    }
+
+    .pair-link {
+      width: 80px;
+      height: 2px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--accent-sky),
+        transparent
+      );
+      position: relative;
+    }
+
+    .pair-link::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent-sky);
+      animation: travel 2s linear infinite;
+    }
+
+    @keyframes travel {
+      0% {
+        left: 0;
+        opacity: 0;
+      }
+      20% {
+        opacity: 1;
+      }
+      80% {
+        opacity: 1;
+      }
+      100% {
+        left: 100%;
+        opacity: 0;
+      }
+    }
+
+    /* --- Step 2 : AI learning (neural pulse) --- */
+    .ai-stage {
+      width: 100%;
+      height: 340px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .ai-brain {
+      font-size: 5rem;
+      color: var(--accent-sky);
+      animation: brainGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes brainGlow {
+      0%,
+      100% {
+        text-shadow: 0 0 20px rgba(41, 151, 255, 0.3);
+        transform: scale(1);
+      }
+      50% {
+        text-shadow: 0 0 50px rgba(41, 151, 255, 0.8);
+        transform: scale(1.1);
+      }
+    }
+
+    .ai-orbit {
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      border: 1px solid rgba(41, 151, 255, 0.2);
+      border-radius: 50%;
+      animation: orbitSpin 6s linear infinite;
+    }
+
+    .ai-orbit::before {
+      content: "";
+      position: absolute;
+      top: -4px;
+      left: 50%;
+      width: 8px;
+      height: 8px;
+      background: var(--accent-sky);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--accent-sky);
+    }
+
+    @keyframes orbitSpin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* --- Step 3 : Map & ring (locator pulse) --- */
+    .map-stage {
+      width: 100%;
+      height: 340px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .map-grid {
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(
+          rgba(41, 151, 255, 0.05) 1px,
+          transparent 1px
+        ),
+        linear-gradient(90deg, rgba(41, 151, 255, 0.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    .map-pin {
+      font-size: 3.5rem;
+      color: var(--accent-sky);
+      position: relative;
+      z-index: 2;
+      animation: pinDrop 1.8s ease-out infinite;
+    }
+
+    @keyframes pinDrop {
+      0% {
+        transform: translateY(-30px);
+        opacity: 0;
+      }
+      30% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .map-ring {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: 2px solid rgba(41, 151, 255, 0.6);
+      animation: mapPulse 2s ease-out infinite;
+    }
+
+    @keyframes mapPulse {
+      0% {
+        transform: scale(0.6);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(2.8);
+        opacity: 0;
+      }
+    }
+
+    /* ============================================================
+       STATS — counter numbers
+       ============================================================ */
+    .stats-bar {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      padding: 100px 0;
+      border-top: 1px solid var(--border-dark);
+      border-bottom: 1px solid var(--border-dark);
+      margin: 100px 0;
+    }
+
+    .section-light .stats-bar {
+      border-color: var(--border-light);
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 20px;
+      flex: 1;
+      min-width: 160px;
+    }
+
+    .stat-number {
+      font-size: 3.2rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-secondary-dark);
+      margin-top: 10px;
+    }
+
+    .section-light .stat-label {
+      color: var(--text-secondary-light);
+    }
+
+    /* ============================================================
+       STORY / ABOUT — alternating image‑text rows
+       ============================================================ */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+      margin-bottom: 120px;
+    }
+
+    .about-grid:last-child {
+      margin-bottom: 0;
+    }
+
+    .about-grid:nth-child(even) {
+      direction: rtl;
+    }
+
+    .about-grid:nth-child(even) > * {
+      direction: ltr;
+    }
+
+    .about-img {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border-dark);
+      min-height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0a0a0c;
+    }
+
+    .section-light .about-img {
+      border-color: var(--border-light);
+      background: #e8e8ed;
+    }
+
+    .about-illustration {
+      font-size: 5rem;
+      color: var(--accent-sky);
+      opacity: 0.85;
+    }
+
+    .section-light .about-illustration {
+      color: var(--accent-blue);
+    }
+
+    /* ============================================================
+       NEWS — cards
+       ============================================================ */
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 3rem;
+    }
+
+    .news-card {
+      background: #121214;
+      border: 1px solid var(--border-dark);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.35s, border-color 0.35s;
+    }
+
+    .section-light .news-card {
+      background: #ffffff;
+      border-color: var(--border-light);
+    }
+
+    .news-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(41, 151, 255, 0.35);
+    }
+
+    .news-thumb {
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.8rem;
+      color: var(--accent-sky);
+      background: linear-gradient(135deg, #0a1628, #16213e);
+    }
+
+    .section-light .news-thumb {
+      background: linear-gradient(135deg, #e8e8ed, #d2d2d7);
+      color: var(--accent-blue);
+    }
+
+    .news-body {
+      padding: 24px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .news-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent-sky);
+      margin-bottom: 0.6rem;
+    }
+
+    .section-light .news-tag {
+      color: var(--accent-blue);
+    }
+
+    .news-body h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.6rem;
+      line-height: 1.35;
+    }
+
+    .news-body p {
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      flex-grow: 1;
+    }
+
+    .news-date {
+      font-size: 0.75rem;
+      color: var(--text-secondary-light);
+    }
+
+    /* ============================================================
+       CONTACT — form
+       ============================================================ */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 80px;
+      align-items: start;
+      margin-top: 3rem;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 2rem;
+    }
+
+    .contact-item i {
+      font-size: 1.4rem;
+      color: var(--accent-sky);
+      margin-top: 2px;
+    }
+
+    .contact-item h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .contact-item p {
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    .contact-form {
+      background: #121214;
+      border: 1px solid var(--border-dark);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+    }
+
+    .section-light .contact-form {
+      background: #ffffff;
+      border-color: var(--border-light);
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-secondary-dark);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 14px 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: var(--text-light);
+      font-family: var(--font-main);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.25s, background 0.25s;
+    }
+
+    .section-light .form-group input,
+    .section-light .form-group textarea,
+    .section-light .form-group select {
+      background: rgba(0, 0, 0, 0.03);
+      border-color: rgba(0, 0, 0, 0.12);
+      color: var(--text-dark);
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: var(--accent-sky);
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .section-light .form-group input:focus,
+    .section-light .form-group textarea:focus,
+    .section-light .form-group select:focus {
+      border-color: var(--accent-blue);
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 140px;
+    }
+
+    /* ============================================================
+       FOOTER
+       ============================================================ */
+    .footer {
+      padding: 100px 0 50px;
+      border-top: 1px solid var(--border-dark);
+      background: var(--bg-black);
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 60px;
+    }
+
+    .footer-brand {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .footer-brand span {
+      color: var(--accent-sky);
+    }
+
+    .footer-desc {
+      font-size: 0.9rem;
+      max-width: 300px;
+      color: var(--text-secondary-dark);
+    }
+
+    .footer-col h4 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-secondary-dark);
+      margin-bottom: 1.2rem;
+    }
+
+    .footer-col ul {
+      list-style: none;
+    }
+
+    .footer-col li {
+      margin-bottom: 0.7rem;
+    }
+
+    .footer-col a {
+      font-size: 0.9rem;
+      color: var(--text-secondary-dark);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-col a:hover {
+      color: var(--text-light);
+    }
+
+    .footer-bottom {
+      padding-top: 30px;
+      border-top: 1px solid var(--border-dark);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 0.8rem;
+      color: var(--text-secondary-light);
+    }
+
+    /* ============================================================
+       REVEAL BASE
+       ============================================================ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 1024px) {
+      .bento-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .how-step {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        min-height: auto;
+      }
+      .how-step:nth-child(even) {
+        direction: ltr;
+      }
+      .about-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+      .about-grid:nth-child(even) {
+        direction: ltr;
+      }
+      .news-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+      .footer-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+      .bento-grid {
+        grid-template-columns: 1fr;
+      }
+      .bento-wide {
+        grid-column: span 1;
+      }
+      .bento-tall {
+        grid-row: span 1;
+      }
+      .news-grid {
+        grid-template-columns: 1fr;
+      }
+      .stats-bar {
+        flex-direction: column;
+        gap: 30px;
+      }
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+      .contact-form {
+        padding: 24px;
+      }
+      .hero-visual,
+      .radar-stage {
+        min-height: 280px;
+        height: 280px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ============================================================
+       NAVBAR
+       ============================================================ -->
+  <nav class="navbar">
+    <div class="container-wide">
+      <a href="#" class="nav-logo">LostLink<span>AI</span></a>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how">How It Works</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#news">News</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <a href="#contact" class="nav-cta">Get Early Access</a>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       HERO — live radar / pulse animation
+       ============================================================ -->
+  <section class="hero">
+    <p class="hero-eyebrow">Introducing LostLink AI</p>
+    <h1>Find what matters.<br />Before it's gone.</h1>
+    <p class="hero-sub">
+      AI‑powered tracking that rings your lost items, pins them on a live map,
+      and syncs instantly to your Watch. Never lose anything again.
+    </p>
+    <div class="hero-actions">
+      <a href="#features" class="btn-primary"
+        ><i class="ph ph-radar"></i> Explore Features</a
+      >
+      <a href="#how" class="btn-ghost"
+        ><i class="ph ph-play-circle"></i> See How It Works</a
+      >
+    </div>
+
+    <!-- Live radar visual (pure CSS/SVG animation) -->
+    <div class="hero-visual reveal">
+      <div class="radar-stage">
+        <svg class="radar-svg" viewBox="0 0 600 420" fill="none">
+          <!-- grid lines -->
+          <line x1="0" y1="210" x2="600" y2="210" stroke="#1a2a3a" stroke-width="1" />
+          <line x1="300" y1="0" x2="300" y2="420" stroke="#1a2a3a" stroke-width="1" />
+          <circle cx="300" cy="210" r="140" stroke="#1a2a3a" stroke-width="1" />
+          <circle cx="300" cy="210" r="90" stroke="#1a2a3a" stroke-width="1" />
+          <circle cx="300" cy="210" r="40" stroke="#1a2a3a" stroke-width="1" />
+
+          <!-- pulse rings -->
+          <circle class="pulse-ring" cx="300" cy="210" r="40" stroke="#2997ff" stroke-width="2" fill="none" />
+          <circle class="pulse-ring" cx="300" cy="210" r="40" stroke="#2997ff" stroke-width="2" fill="none" />
+          <circle class="pulse-ring" cx="300" cy="210" r="40" stroke="#2997ff" stroke-width="2" fill="none" />
+
+          <!-- sweep -->
+          <g class="radar-sweep" style="transform-origin: 300px 210px;">
+            <line x1="300" y1="210" x2="300" y2="70" stroke="url(#sweepGrad)" stroke-width="2" />
+            <polygon points="300,210 300,70 340,80" fill="rgba(41,151,255,0.08)" />
+          </g>
+
+          <!-- tracker dot -->
+          <circle class="tracker-dot" cx="380" cy="160" r="6" fill="#2997ff" />
+          <circle cx="380" cy="160" r="14" stroke="#2997ff" stroke-width="1" opacity="0.35" />
+
+          <defs>
+            <linearGradient id="sweepGrad" x1="300" y1="210" x2="300" y2="70" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#2997ff" stop-opacity="0.9" />
+              <stop offset="1" stop-color="#2997ff" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FEATURES — Bento grid (dark)
+       ============================================================ -->
+  <section class="section-dark" id="features">
+    <div class="container">
+      <p class="section-label reveal">Intelligence</p>
+      <h2 class="reveal" style="margin-bottom: 0;">Every item,<br />always within reach.</h2>
+
+      <div class="bento-grid reveal-stagger">
+        <div class="bento-card bento-wide">
+          <i class="ph ph-bell-ringing bento-icon"></i>
+          <h3>Make It Ring</h3>
+          <p>
+            Lost your keys in the couch again? Trigger a sound from your phone —
+            or let AI ping it automatically when it detects separation.
+          </p>
+        </div>
+        <div class="bento-card">
+          <i class="ph ph-map-pin bento-icon"></i>
+          <h3>Live Map</h3>
+          <p>
+            See the exact last‑known location on an ultra‑precise map. Works
+            indoors and outdoors.
+          </p>
+        </div>
+        <div class="bento-card">
+          <i class="ph ph-watch bento-icon"></i>
+          <h3>Watch Sync</h3>
+          <p>
+            Glance at your wrist. Your Watch shows nearby items and alerts
+            instantly.
+          </p>
+        </div>
+        <div class="bento-card bento-wide">
+          <i class="ph ph-brain bento-icon"></i>
+          <h3>AI Separation Alerts</h3>
+          <p>
+            Our AI learns your routine. If you walk away without something
+            important — like your backpack — it taps you on the shoulder before
+            you're too far.
+          </p>
+        </div>
+        <div class="bento-card">
+          <i class="ph ph-devices bento-icon"></i>
+          <h3>Any Device</h3>
+          <p>
+            iPhone, Apple Watch, iPad, or Mac. Your items appear wherever you
+            are.
+          </p>
+        </div>
+        <div class="bento-card">
+          <i class="ph ph-battery-full bento-icon"></i>
+          <h3>Year‑Long Battery</h3>
+          <p>A single charge keeps your tracker alive for up to 12 months.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       HOW IT WORKS — pinned steps with scrubbed animations
+       ============================================================ -->
+  <section class="section-dark how-section" id="how">
+    <div class="container">
+      <p class="section-label reveal">How It Works</p>
+      <h2 class="reveal" style="margin-bottom: 4rem;">Three steps.<br />Zero lost items.</h2>
+
+      <!-- Step 1 -->
+      <div class="how-step">
+        <div>
+          <div class="step-number">01</div>
+          <h3>Attach &amp; Pair</h3>
+          <p>
+            Clip LostLink to your keys, slip it into your wallet, or drop it in
+            your bag. It pairs with your phone in under ten seconds — no setup
+            headaches.
+          </p>
+        </div>
+        <div class="step-visual">
+          <div class="pair-anim">
+            <i class="ph ph-device-mobile pair-icon"></i>
+            <div class="pair-link"></div>
+            <i class="ph ph-bluetooth pair-icon"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="how-step">
+        <div>
+          <div class="step-number">02</div>
+          <h3>AI Learns Your Moves</h3>
+          <p>
+            LostLink silently learns where your items usually are — your desk,
+            your car, your favorite café. It builds a personal map of your life,
+            just like Precision Finding understands distance and direction.
+          </p>
+        </div>
+        <div class="step-visual">
+          <div class="ai-stage">
+            <div class="ai-orbit"></div>
+            <i class="ph ph-brain ai-brain"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="how-step">
+        <div>
+          <div class="step-number">03</div>
+          <h3>Find It — Instantly</h3>
+          <p>
+            When something goes missing, tap once. Your item rings, appears on
+            the map, and your Watch nudges you in the right direction. Found, in
+            seconds.
+          </p>
+        </div>
+        <div class="step-visual">
+          <div class="map-stage">
+            <div class="map-grid"></div>
+            <div class="map-ring"></div>
+            <i class="ph ph-map-pin map-pin"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       STATS (dark)
+       ============================================================ -->
+  <div class="container">
+    <div class="stats-bar reveal">
+      <div class="stat-item">
+        <div class="stat-number" data-target="2.4" data-suffix="M+">0</div>
+        <div class="stat-label">Items Recovered</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" data-target="98" data-suffix="%">0</div>
+        <div class="stat-label">AI Accuracy</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" data-target="12" data-suffix="s">0</div>
+        <div class="stat-label">Average Find Time</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" data-target="4.9" data-suffix="★">0</div>
+        <div class="stat-label">User Rating</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       ABOUT / STORY — light section
+       ============================================================ -->
+  <section class="section-light" id="about">
+    <div class="container">
+      <p class="section-label reveal">Our Story</p>
+      <h2 class="reveal" style="margin-bottom: 1.2rem;">We believe nothing<br />should stay lost.</h2>
+      <p class="reveal" style="max-width: 580px; margin-bottom: 4rem;">
+        LostLink AI was born from a simple frustration: the panic of misplacing
+        something irreplaceable. We built the intelligence to make that feeling
+        disappear.
+      </p>
+
+      <div class="about-grid">
+        <div class="reveal">
+          <p class="section-label">The Problem</p>
+          <h2>We lose more than objects.<br />We lose moments.</h2>
+          <p style="margin-top: 1.5rem;">
+            A lost passport can derail a trip. A misplaced wedding ring carries
+            a weight no insurance can replace. Conventional trackers only tell
+            you where something was — they don't understand your life.
+          </p>
+        </div>
+        <div class="about-img reveal">
+          <i class="ph ph-warning-circle about-illustration"></i>
+        </div>
+      </div>
+
+      <div class="about-grid">
+        <div class="reveal">
+          <p class="section-label">Our Solution</p>
+          <h2>AI that doesn't just track.<br />It understands.</h2>
+          <p style="margin-top: 1.5rem;">
+            LostLink learns your habits, your spaces, and your routines. It
+            doesn't wait for you to ask — it proactively alerts you before
+            something is left behind, and guides you back to it with precision.
+          </p>
+        </div>
+        <div class="about-img reveal">
+          <i class="ph ph-lightbulb about-illustration"></i>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       NEWS — dark section
+       ============================================================ -->
+  <section class="section-dark" id="news">
+    <div class="container">
+      <p class="section-label reveal">Newsroom</p>
+      <h2 class="reveal" style="margin-bottom: 1rem;">What's new at LostLink.</h2>
+      <p class="reveal" style="max-width: 520px; margin-bottom: 3rem;">
+        Product updates, AI breakthroughs, and stories from the community.
+      </p>
+
+      <div class="news-grid reveal-stagger">
+        <a href="#" class="news-card">
+          <div class="news-thumb"><i class="ph ph-rocket-launch"></i></div>
+          <div class="news-body">
+            <div class="news-tag">Product Update</div>
+            <h3>LostLink 2.0 — AI Separation Alerts Now Live</h3>
+            <p>
+              Our biggest update yet. The AI now predicts when you're about to
+              leave something behind, up to 90 seconds before it happens.
+            </p>
+            <div class="news-date">March 12, 2026</div>
+          </div>
+        </a>
+
+        <a href="#" class="news-card">
+          <div class="news-thumb"><i class="ph ph-watch"></i></div>
+          <div class="news-body">
+            <div class="news-tag">Integration</div>
+            <h3>Full Apple Watch Series 11 Support</h3>
+            <p>
+              Now with haptic navigation. Your Watch gently taps your wrist to
+              guide you toward the lost item — no screen needed.
+            </p>
+            <div class="news-date">February 28, 2026</div>
+          </div>
+        </a>
+
+        <a href="#" class="news-card">
+          <div class="news-thumb"><i class="ph ph-users"></i></div>
+          <div class="news-body">
+            <div class="news-tag">Community</div>
+            <h3>2.4 Million Items Recovered</h3>
+            <p>
+              A milestone we never imagined. From passports to wedding rings,
+              here are five stories that remind us why we build.
+            </p>
+            <div class="news-date">February 10, 2026</div>
+          </div>
+        </a>
+
+        <a href="#" class="news-card">
+          <div class="news-thumb"><i class="ph ph-map-trifold"></i></div>
+          <div class="news-body">
+            <div class="news-tag">Technology</div>
+            <h3>Indoor Mapping Just Got Scary Accurate</h3>
+            <p>
+              New ultra‑wideband integration gives you room‑level precision
+              inside airports, malls, and offices.
+            </p>
+            <div class="news-date">January 22, 2026</div>
+          </div>
+        </a>
+
+        <a href="#" class="news-card">
+          <div class="news-thumb"><i class="ph ph-leaf"></i></div>
+          <div class="news-body">
+            <div class="news-tag">Sustainability</div>
+            <h3>100% Recycled Aluminum Enclosure</h3>
+            <p>
+              Starting with LostLink 2.0, every tracker is housed in recycled
+              aluminum — same durability, half the carbon footprint.
+            </p>
+            <div class="news-date">January 5, 2026</div>
+          </div>
+        </a>
+
+        <a href="#" class="news-card">
+          <div class="news-thumb"><i class="ph ph-trophy"></i></div>
+          <div class="news-body">
+            <div class="news-tag">Award</div>
+            <h3>Best AI Product of 2025 — TechCrunch</h3>
+            <p>
+              We're honored to be recognized among the most impactful AI
+              applications of the year.
+            </p>
+            <div class="news-date">December 15, 2025</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       CONTACT — light section
+       ============================================================ -->
+  <section class="section-light" id="contact">
+    <div class="container">
+      <div class="contact-grid">
+        <div class="contact-info reveal">
+          <p class="section-label">Get in Touch</p>
+          <h2>Let's talk.</h2>
+          <p style="margin-bottom: 2rem;">
+            Whether you're curious about LostLink, need support, or want to
+            explore a partnership — drop us a line.
+          </p>
+
+          <div class="contact-item">
+            <i class="ph ph-envelope-simple"></i>
+            <div>
+              <h4>Email</h4>
+              <p>hello@lostlink.ai</p>
+            </div>
+          </div>
+          <div class="contact-item">
+            <i class="ph ph-phone"></i>
+            <div>
+              <h4>Phone</h4>
+              <p>+1 (415) 555‑0132</p>
+            </div>
+          </div>
+          <div class="contact-item">
+            <i class="ph ph-map-pin"></i>
+            <div>
+              <h4>Office</h4>
+              <p>548 Market Street, San Francisco, CA 94104</p>
+            </div>
+          </div>
+          <div class="contact-item">
+            <i class="ph ph-clock"></i>
+            <div>
+              <h4>Hours</h4>
+              <p>Mon–Fri, 9am–6pm PT</p>
+            </div>
+          </div>
+        </div>
+
+        <form class="contact-form reveal" id="contactForm">
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" placeholder="Jane Appleseed" required />
+          </div>
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" placeholder="jane@example.com" required />
+          </div>
+          <div class="form-group">
+            <label for="topic">What's this about?</label>
+            <select id="topic" required>
+              <option value="" disabled selected>Select a topic</option>
+              <option value="support">Product Support</option>
+              <option value="partnership">Partnership</option>
+              <option value="press">Press &amp; Media</option>
+              <option value="other">Something else</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="message">Message</label>
+            <textarea id="message" placeholder="Tell us what's on your mind..." required></textarea>
+          </div>
+          <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">
+            <i class="ph ph-paper-plane-tilt"></i> Send Message
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">LostLink<span>AI</span></div>
+          <p class="footer-desc">
+            Intelligent tracking for the things that matter most. Designed for
+            peace of mind.
+          </p>
+        </div>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#how">How It Works</a></li>
+            <li><a href="#">Pricing</a></li>
+            <li><a href="#">Accessories</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#about">About</a></li>
+            <li><a href="#news">News</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li><a href="#">Careers</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="#">Help Center</a></li>
+            <li><a href="#">Privacy</a></li>
+            <li><a href="#">Terms</a></li>
+            <li><a href="#">Warranty</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 LostLink AI. All rights reserved.</span>
+        <span>Designed with care. Built for peace of mind.</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       SCRIPTS — GSAP ScrollTrigger for Apple‑style scrollytelling
+       ============================================================ -->
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    /* ------------------------------------------------------------
+       1. Navbar auto‑hide on scroll down
+       ------------------------------------------------------------ */
+    let lastScrollY = window.scrollY;
+    const navbar = document.querySelector(".navbar");
+
+    window.addEventListener("scroll", () => {
+      const scrollY = window.scrollY;
+      if (scrollY > lastScrollY && scrollY > 100) {
+        navbar.style.transform = "translateY(-100%)";
+      } else {
+        navbar.style.transform = "translateY(0)";
+      }
+      lastScrollY = scrollY;
+    });
+
+    /* ------------------------------------------------------------
+       2. Simple reveal on scroll (non‑pinned)
+       ------------------------------------------------------------ */
+    document.querySelectorAll(".reveal").forEach((el) => {
+      gsap.to(el, {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: el,
+          start: "top 88%",
+          toggleActions: "play none none none",
+        },
+      });
+    });
+
+    /* ------------------------------------------------------------
+       3. Stagger reveal for grids
+       ------------------------------------------------------------ */
+    document.querySelectorAll(".reveal-stagger").forEach((grid) => {
+      const children = grid.children;
+      gsap.set(children, { opacity: 0, y: 50 });
+      gsap.to(children, {
+        opacity: 1,
+        y: 0,
+        duration: 0.85,
+        stagger: 0.1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: grid,
+          start: "top 85%",
+          toggleActions: "play none none none",
+        },
+      });
+    });
+
+    /* ------------------------------------------------------------
+       4. Hero visual subtle parallax
+       ------------------------------------------------------------ */
+    gsap.to(".hero-visual", {
+      y: -50,
+      ease: "none",
+      scrollTrigger: {
+        trigger: ".hero",
+        start: "top top",
+        end: "bottom top",
+        scrub: true,
+      },
+    });
+
+    /* ------------------------------------------------------------
+       5. Animated stat counters
+       ------------------------------------------------------------ */
+    document.querySelectorAll(".stat-number").forEach((el) => {
+      const target = parseFloat(el.getAttribute("data-target"));
+      const suffix = el.getAttribute("data-suffix") || "";
+      const obj = { val: 0 };
+
+      gsap.to(obj, {
+        val: target,
+        duration: 2,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: el,
+          start: "top 90%",
+          toggleActions: "play none none none",
+        },
+        onUpdate: () => {
+          el.textContent = Math.round(obj.val) + suffix;
+        },
+      });
+    });
+
+    /* ------------------------------------------------------------
+       6. Apple‑style pinned / scrubbed “How it works” steps
+          Each step‑visual scales and rotates slightly as it pins.
+       ------------------------------------------------------------ */
+    document.querySelectorAll(".how-step").forEach((step) => {
+      const visual = step.querySelector(".step-visual");
+
+      gsap.fromTo(
+        visual,
+        { scale: 0.92, opacity: 0.6 },
+        {
+          scale: 1,
+          opacity: 1,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: step,
+            start: "top 80%",
+            end: "top 30%",
+            scrub: true,
+          },
+        }
+      );
+    });
+
+    /* ------------------------------------------------------------
+       7. Contact form demo feedback
+       ------------------------------------------------------------ */
+    const form = document.getElementById("contactForm");
+    if (form) {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const btn = form.querySelector('button[type="submit"]');
+        const original = btn.innerHTML;
+        btn.innerHTML = "Sending...";
+        btn.disabled = true;
+
+        setTimeout(() => {
+          btn.innerHTML = "✓ Message Sent!";
+          btn.style.background = "#1a7f37";
+          form.reset();
+
+          setTimeout(() => {
+            btn.innerHTML = original;
+            btn.style.background = "";
+            btn.disabled = false;
+          }, 2500);
+        }, 1500);
+      });
+    }
+  </script>
+</body>
+</html>
